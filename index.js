@@ -10,10 +10,7 @@ let db;
 app.use(express.json());
 
 async function connectToDatabase() {
-  const client = new MongoClient(url, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  const client = new MongoClient(url);
 
   try {
     await client.connect();
@@ -56,3 +53,5 @@ connectToDatabase().then(() => {
     console.log(`Server is running on port ${PORT}`);
   });
 });
+
+module.exports = app;
