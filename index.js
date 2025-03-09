@@ -5,10 +5,11 @@ const app = express();
 
 const url = process.env.MONGO_URI;
 const dbName = "ordbanken-db";
+let db;
 
 app.use(express.json());
 
-async function getDatabaseData() {
+async function connectToDatabase() {
   const client = new MongoClient(url, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -18,30 +19,40 @@ async function getDatabaseData() {
     await client.connect();
     console.log("Connected to MongoDB");
 
-    const db = client.db(dbName);
-    const collection = db.collection("ordbank");
-
-    const docs = await collection.find({}).toArray();
-
-    return docs;
+    db = client.db(dbName);
   } catch (err) {
     console.error("Error connecting to MongoDB:", err);
-    return [];
-  } finally {
-    await client.close();
+    process.exit(1);
   }
 }
 
-app.get("/", async (req, res) => {
+async function getCollectionData(category = null) {
+  const collection = db.collection("ordbank");
+
   try {
-    const data = await getDatabaseData();
+    const query = category ? { category } : {};
+    const docs = await collection.find(query).toArray();
+    return docs;
+  } catch (err) {
+    console.error("Error retrieving data:", err);
+    return [];
+  }
+}
+
+app.get("/api/fetch_all", async (req, res) => {
+  const { category } = req.query;
+
+  try {
+    const data = await getCollectionData(category);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: "Failed to retrieve data" });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+connectToDatabase().then(() => {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 });
