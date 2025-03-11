@@ -10,10 +10,13 @@ let db;
 app.use(express.json());
 
 async function connectToDatabase() {
-  const client = new MongoClient(url);
-
   try {
-    await client.connect();
+    const client = new MongoClient(url, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 30000,
+      keepAlive: true,
+    });
     console.log("Connected to MongoDB");
 
     db = client.db(dbName);
