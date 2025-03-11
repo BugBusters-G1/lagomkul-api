@@ -15,7 +15,6 @@ async function connectToDatabase() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 30000,
-      keepAlive: true,
     });
     console.log("Connected to MongoDB");
 
