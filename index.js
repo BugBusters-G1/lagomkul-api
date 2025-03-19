@@ -1,13 +1,24 @@
 require("dotenv").config();
+
 const { MongoClient } = require("mongodb");
+
 const express = require("express");
+
 const app = express();
 
 const url = process.env.MONGO_URI;
+
 const dbName = "ordbanken-db";
 let db;
 
 app.use(express.json());
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // Allow any origin, or specify a domain
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  next();
+});
 
 async function connectToDatabase() {
   try {
@@ -16,6 +27,7 @@ async function connectToDatabase() {
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 30000,
     });
+
     console.log("Connected to MongoDB");
 
     db = client.db(dbName);
