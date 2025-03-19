@@ -56,6 +56,7 @@ app.get("/api/fetch_all", async (req, res) => {
   try {
     const data = await getCollectionData(category);
     res.json(data);
+    console.log("Sent back data.");
   } catch (error) {
     res.status(500).json({ error: "Failed to retrieve data" });
   }
