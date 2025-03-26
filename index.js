@@ -53,7 +53,27 @@ async function getCollectionData(category = null) {
 app.get("/api/categories", async (req, res) => {
   try {
     const collection = db.collection("ordbank");
-    const categories = await collection.distinct("category");
+
+    const categories = await collection
+      .aggregate([
+        {
+          $group: {
+            _id: "$category",
+            categoryInSwedish: { $first: "$categoryInSwedish" },
+            categoryInEnglish: { $first: "$categoryInEnglish" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            category: "$_id",
+            categoryInSwedish: 1,
+            categoryInEnglish: 1,
+          },
+        },
+      ])
+      .toArray();
+
     res.json(categories);
     console.log("Sent back categories.");
   } catch (error) {
